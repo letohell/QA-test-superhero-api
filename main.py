@@ -1,48 +1,31 @@
-import requests
-
-url = "https://akabab.github.io/superhero-api/api/all.json"
-response = requests.get(url)
-data = response.json()
-
-def get_tallest_hero(gender: str, has_job: bool):
+def get_highest_hero(gender: str, has_job: bool):
     import requests
 
     url = "https://akabab.github.io/superhero-api/api/all.json"
-    response = requests.get(url)
-    heroes = response.json()
+    heroes = requests.get(url).json()
 
-    tallest_hero = None
-    max_height = -1
+    highest = None
+    max_height = 0
 
-    for hero in heroes:
-        # Проверка пола
-        if hero.get("appearance", {}).get("gender") != gender:
+    for h in heroes:
+        if h["appearance"]["gender"] != gender:
             continue
 
-        # Проверка наличия работы
-        occupation = hero.get("work", {}).get("occupation")
-        has_occupation = occupation not in ["-", "", None]
+        occupation = h["work"]["occupation"]
+        has_occupation = occupation not in ["-", ""]
 
         if has_job != has_occupation:
             continue
 
-        # Получение роста
-        height_str = hero.get("appearance", {}).get("height", ["0 cm", "0 cm"])[1]
+        height_str = h["appearance"]["height"][1]
 
         if height_str == "0 cm":
             continue
 
-        try:
-            height = int(height_str.split()[0])
-        except (ValueError, IndexError):
-            continue
+        height = int(float(height_str.split()[0]))
 
-        # Поиск максимального роста
         if height > max_height:
             max_height = height
-            tallest_hero = hero
+            highest = h
 
-    if tallest_hero:
-        return tallest_hero.get("name")
-
-    return None
+    return highest["name"] if highest else None
